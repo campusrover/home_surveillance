@@ -1,9 +1,9 @@
 # Robot Convoy
 
-# Team Members
+## Team Members
 1. Jongsuh Lee (James)
 
-# Project Description
+## Project Description
 
 On program execution, the robots will:
 1. elect a leader amongst themselves (Leader Election Phase);
@@ -26,12 +26,12 @@ The events will either trigger a repeat from the Leader Election Phase in the ca
 The MRS will account for a subset or proper superset of the events in #1-#4, depending on the difficulty of the project. The goal is to have a distributed MRS that is as
 robust as possible and resilient to component failures, communication failures, etc.
 
-# Learning Goals
+## Learning Goals
 
 1. Learn Raft's Leader Election Algorithm, and maybe proceed to log replication as well, and use it to effect coordinated behaviors among the various robots.
 2. Develop a high degree of proficiency with robot localization and navigation using the tf2 package, map servers, etc.
 
-# How I would like to be evaluated.
+## How I would like to be evaluated.
 
 1. Success in leveraging ROS's distributed system of topics, services, and actions to implement Raft.
 2. Usage of Raft's leader election and log replication algorithms to make the robots do something interesting.
