@@ -97,7 +97,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: robot1
-      Robot Description: robot_description
+      Robot Description: /robot1_description
       TF Prefix: "robot1"
       Update Interval: 0
       Value: true
@@ -146,7 +146,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: robot2
-      Robot Description: robot_description
+      Robot Description: /robot2_description
       TF Prefix: "robot2"
       Update Interval: 0
       Value: true
@@ -195,7 +195,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: robot3
-      Robot Description: robot_description
+      Robot Description: /robot3_description
       TF Prefix: "robot3"
       Update Interval: 0
       Value: true
@@ -244,7 +244,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: robot4
-      Robot Description: robot_description
+      Robot Description: /robot4_description
       TF Prefix: "robot4"
       Update Interval: 0
       Value: true
@@ -293,7 +293,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: robot5
-      Robot Description: robot_description
+      Robot Description: /robot5_description
       TF Prefix: "robot5"
       Update Interval: 0
       Value: true

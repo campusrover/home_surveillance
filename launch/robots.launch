@@ -1,11 +1,14 @@
 <launch>
   <arg name="model"/>
+  <!-- Shared Description -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/shared/turtlebot3_$(arg model).urdf.xacro" />
+
+  <!-- Robot-specific descriptions -->
   <param name="robot1_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot1/turtlebot3_$(arg model).urdf.xacro" />
   <param name="robot2_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot2/turtlebot3_$(arg model).urdf.xacro" />
   <param name="robot3_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot3/turtlebot3_$(arg model).urdf.xacro" />
   <param name="robot4_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot4/turtlebot3_$(arg model).urdf.xacro" />
   <param name="robot5_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot5/turtlebot3_$(arg model).urdf.xacro" />
-
   
   <!-- BEGIN ROBOT 1-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
