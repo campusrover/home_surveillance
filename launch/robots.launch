@@ -1,51 +1,55 @@
 <launch>
-  <!-- No namespace here as we will share this description. 
-       Access with slash at the beginning -->
-  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+  <arg name="model"/>
+  <param name="robot1_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot1/turtlebot3_$(arg model).urdf.xacro" />
+  <param name="robot2_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot2/turtlebot3_$(arg model).urdf.xacro" />
+  <param name="robot3_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot3/turtlebot3_$(arg model).urdf.xacro" />
+  <param name="robot4_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot4/turtlebot3_$(arg model).urdf.xacro" />
+  <param name="robot5_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robot5/turtlebot3_$(arg model).urdf.xacro" />
+
   
   <!-- BEGIN ROBOT 1-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
-    <arg name="init_pose" value="-x 0 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose" value="-x -2 -y -1 -z 0 -Y 0" />
+    <arg name="init_pose_x" value="-2"/>
+    <arg name="init_pose_y" value="-1"/>
     <arg name="robot_name"  value="robot1" />
+    <arg name="model" value="$(arg model)"/>
   </include>
-  <node pkg="robot_convoy" type="keys_to_twist_using_rate.py" name="keys_to_twist_robot1">
-    <param name="robot_name" type="string" value="robot1" />
-  </node>
 
   <!-- BEGIN ROBOT 2-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
-    <arg name="init_pose" value="-x -1 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose" value="-x -2 -y -0.5 -z 0 -Y 0" />
+    <arg name="init_pose_x" value="-2"/>
+    <arg name="init_pose_y" value="-0.5"/>
     <arg name="robot_name"  value="robot2" />
+    <arg name="model" value="$(arg model)"/>
   </include>
-  <node pkg="robot_convoy" type="keys_to_twist_using_rate.py" name="keys_to_twist_robot2">
-    <param name="robot_name" type="string" value="robot2" />
-  </node>
 
   <!-- BEGIN ROBOT 3-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
-    <arg name="init_pose" value="-x -2 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose" value="-x -2 -y 0 -z 0 -Y 0" />
+    <arg name="init_pose_x" value="-2"/>
+    <arg name="init_pose_y" value="0"/>
     <arg name="robot_name"  value="robot3" />
+    <arg name="model" value="$(arg model)"/>
   </include>
-  <node pkg="robot_convoy" type="keys_to_twist_using_rate.py" name="keys_to_twist_robot3">
-    <param name="robot_name" type="string" value="robot3" />
-  </node>
 
   <!-- BEGIN ROBOT 4-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
-    <arg name="init_pose" value="-x -3 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose" value="-x -2 -y 0.5 -z 0 -Y 0" />
+    <arg name="init_pose_x" value="-2"/>
+    <arg name="init_pose_y" value="0.5"/>
     <arg name="robot_name"  value="robot4" />
+    <arg name="model" value="$(arg model)"/>
   </include>
-  <node pkg="robot_convoy" type="keys_to_twist_using_rate.py" name="keys_to_twist_robot4">
-    <param name="robot_name" type="string" value="robot4" />
-  </node>
 
   <!-- BEGIN ROBOT 5-->
   <include file="$(find robot_convoy)/launch/one_robot.launch" >
-    <arg name="init_pose" value="-x -4 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose" value="-x -2 -y 1 -z 0 -Y 0" />
+    <arg name="init_pose_x" value="-2"/>
+    <arg name="init_pose_y" value="1"/>
     <arg name="robot_name"  value="robot5" />
+    <arg name="model" value="$(arg model)"/>
   </include>
-  <node pkg="robot_convoy" type="keys_to_twist_using_rate.py" name="keys_to_twist_robot5">
-    <param name="robot_name" type="string" value="robot5" />
-  </node>
+
 </launch>
