@@ -18,9 +18,6 @@
 
         <!-- AMCL -->
         <node pkg="amcl" type="amcl" name="amcl">
-            <remap from="initialpose" to="/initialpose"/>
-            <remap from="amcl_pose" to="/amclpose"/>
-            <remap from="particlecloud" to="/particlecloud"/>
             <remap from="/$(arg robot_name)/map" to="/map"/>
             <param name="use_map_topic" value="true"/>
 
