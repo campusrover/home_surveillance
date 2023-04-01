@@ -1,0 +1,16 @@
+<!-- To be launched on VNC -->
+<launch>
+    <!-- Arguments -->
+    <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]" />
+    <arg name="map_file" default="$(find robot_convoy)/maps/turtleworld.yaml"/>
+    <arg name="open_rviz" default="true"/>
+
+    <!-- Map Server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <!-- rviz -->
+    <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find robot_convoy)/rviz/turtlebot3_navigation.rviz"/>
+    </group>
+</launch>
