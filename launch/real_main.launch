@@ -11,6 +11,6 @@
     <!-- rviz -->
     <group if="$(arg open_rviz)"> 
     <node pkg="rviz" type="rviz" name="rviz" required="true"
-          args="-d $(find robot_convoy)/rviz/turtlebot3_navigation.rviz"/>
+          args="-d $(find robot_convoy)/rviz/real_nav.rviz"/>
     </group>
 </launch>

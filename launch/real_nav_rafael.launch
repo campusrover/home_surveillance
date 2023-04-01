@@ -1,5 +1,4 @@
-<!-- To be launched on each robot. -->
-<!-- Change robot_name arg to name of robot -->
+<!-- To be launched on rafael. -->
 
 <launch>
     <!-- Arguments -->
