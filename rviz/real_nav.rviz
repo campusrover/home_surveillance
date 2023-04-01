@@ -97,7 +97,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: rafael
-      Robot Description: /robot_description
+      Robot Description: /rafael/robot_description
       TF Prefix: "rafael"
       Update Interval: 0
       Value: true
