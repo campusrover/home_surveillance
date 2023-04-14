@@ -268,7 +268,7 @@ Visualization Manager:
           Radius: 0.0299999993
           Shaft Diameter: 0.100000001
           Shaft Length: 0.100000001
-          Topic: /robot1/move_base/DWAPlannerROS/local_plan
+          Topic: /rafael/move_base/DWAPlannerROS/local_plan
           Unreliable: false
           Value: true
       Enabled: true
@@ -282,7 +282,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.0700000003
       Head Radius: 0.0299999993
-      Name: Robot1 AMCL Particles
+      Name: rafael AMCL Particles
       Shaft Length: 0.230000004
       Shaft Radius: 0.00999999978
       Shape: Arrow (Flat)
@@ -297,7 +297,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.300000012
       Head Radius: 0.100000001
-      Name: Robot1 Goal
+      Name: rafael Goal
       Shaft Length: 0.5
       Shaft Radius: 0.0500000007
       Shape: Arrow

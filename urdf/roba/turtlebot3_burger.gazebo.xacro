@@ -51,10 +51,10 @@
     <plugin name="turtlebot3_burger_controller" filename="libgazebo_ros_diff_drive.so">
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
-      <odometryFrame>robot2/odom</odometryFrame>
+      <odometryFrame>roba/odom</odometryFrame>
       <odometrySource>world</odometrySource>
       <publishOdomTF>true</publishOdomTF>
-      <robotBaseFrame>robot2/base_footprint</robotBaseFrame>
+      <robotBaseFrame>roba/base_footprint</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
       <publishTf>true</publishTf>
       <publishWheelJointState>true</publishWheelJointState>
@@ -126,8 +126,8 @@
         </noise>
       </ray>
       <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
-        <topicName>/robot2/scan</topicName>
-        <frameName>robot2/base_scan</frameName>
+        <topicName>/roba/scan</topicName>
+        <frameName>roba/base_scan</frameName>
       </plugin>
     </sensor>
   </gazebo>

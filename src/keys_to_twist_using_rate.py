@@ -16,7 +16,6 @@ def keys_cb(msg, args):
     # Check if there's no message data or if it's not one of our keys
     if len(msg.data) == 0 or msg.data[0] not in key_mapping:
         return # unknown key
-    
     # Fill in the cmd_vel set up on in global context below, based on the info in key_mapping.
     vels = key_mapping[msg.data[0]]
     g_last_twist.angular.z = vels[0]
