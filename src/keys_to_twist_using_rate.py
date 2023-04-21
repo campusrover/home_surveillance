@@ -27,10 +27,11 @@ def keys_cb(msg, args):
 if __name__ == '__main__':
     # declare node
     rospy.init_node('keys_to_twist')
-    robot_name = "rafael"
+    # robot_name = "rafael"
 
     # declare intention to publish topic `cmd_vel`
-    twist_pub = rospy.Publisher(f'{robot_name}/cmd_vel', Twist, queue_size=1)
+    # twist_pub = rospy.Publisher(f'{robot_name}/cmd_vel', Twist, queue_size=1)
+    twist_pub = rospy.Publisher(f'/cmd_vel', Twist, queue_size=1)
 
     # Initialize with an all zeroes Twist message
     g_last_twist = Twist()

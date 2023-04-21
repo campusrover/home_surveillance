@@ -18,7 +18,7 @@
     </include>  
 
     <!-- Launch Robots -->
-    <include file="$(find robot_convoy)/launch/robots.launch">
+    <include file="$(find robot_convoy)/launch/sim_robots.launch">
         <arg name="model" value="$(arg model)"/>
     </include>
 

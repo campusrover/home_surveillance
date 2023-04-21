@@ -1,0 +1,33 @@
+<launch>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="multi_robot_name" default="$(env BRU_NAME)"/>
+  <arg name="set_lidar_frame_id" value="$(arg multi_robot_name)/base_scan"/>
+  
+  <group ns="$(arg multi_robot_name)">
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg multi_robot_name)"/>
+    </node>
+  
+   <node pkg="tf" type="static_transform_publisher" name="raspicam_broadcaster" args="0.04 0 0.115 1.57 0 -1.57 $(arg multi_robot_name)/base_link $(arg multi_robot_name)/raspicam 100"/>
+  
+   <node pkg="ld08_driver" type="ld08_driver" name="turtlebot3_lds" output="screen" args="LD08">
+      <param name="frame_id" value="$(arg set_lidar_frame_id)"/>
+   </node>
+  
+  <include file="$(find raspicam_node)/launch/camerav2_410x308_30fps.launch"></include>
+  <node pkg="rosserial_python" type="serial_node.py" name="turtlebot3_core" output="screen">
+    <param name="port" value="/dev/ttyACM0"/>
+    <param name="baud" value="115200"/>
+    <param name="tf_prefix" value="$(arg multi_robot_name)"/>
+  </node>
+
+   <node pkg="turtlebot3_bringup" type="turtlebot3_diagnostics" name="turtlebot3_diagnostics" output="screen"/>
+  
+  <include file="$(find turtlebot3_bringup)/launch/includes/description.launch.xml">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  </group>
+</launch>
+
