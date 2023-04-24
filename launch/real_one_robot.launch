@@ -2,10 +2,10 @@
 
 <launch>
     <!-- Arguments -->
-    <arg name="robot_name" value="rafael"/>
+    <arg name="robot_name"/>
     <arg name="init_pose_x" default="0"/>
     <arg name="init_pose_y" default="0"/>
-    <arg name="model" value="burger"/>
+    <arg name="model" default="burger"/>
 
     <group ns="$(arg robot_name)">
         <!-- AMCL -->

@@ -1,0 +1,35 @@
+<launch>
+  <arg name="model"/>
+  
+  <!--roba-->
+  <include file="$(find robot_convoy)/launch/real_one_robot.launch" >
+    <arg name="init_pose_x" value="0"/>
+    <arg name="init_pose_y" value="0"/>
+    <arg name="robot_name"  value="roba" />
+    <arg name="model" value="$(arg model)"/>
+  </include>
+
+  <!--robb-->
+  <include file="$(find robot_convoy)/launch/real_one_robot.launch" >
+    <arg name="init_pose_x" value="0"/>
+    <arg name="init_pose_y" value="0.5"/>
+    <arg name="robot_name"  value="robb" />
+    <arg name="model" value="$(arg model)"/>
+  </include>
+
+  <!--robc-->
+  <include file="$(find robot_convoy)/launch/real_one_robot.launch" >
+    <arg name="init_pose_x" value="0"/>
+    <arg name="init_pose_y" value="1"/>
+    <arg name="robot_name"  value="robc" />
+    <arg name="model" value="$(arg model)"/>
+  </include>
+
+  <!--rafael-->
+  <include file="$(find robot_convoy)/launch/real_one_robot.launch" >
+    <arg name="init_pose_x" value="0"/>
+    <arg name="init_pose_y" value="1"/>
+    <arg name="robot_name"  value="rafael" />
+    <arg name="model" value="$(arg model)"/>
+  </include>
+</launch>

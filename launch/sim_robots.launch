@@ -45,17 +45,7 @@
     <arg name="init_pose" value="-x -2 -y 0.5 -z 0 -Y 0" />
     <arg name="init_pose_x" value="-2"/>
     <arg name="init_pose_y" value="0.5"/>
-    <arg name="robot_name"  value="robd" />
-    <arg name="model" value="$(arg model)"/>
-  </include>
-
-  <!-- BEGIN ROBOT 5-->
-  <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
-    <arg name="init_pose" value="-x -2 -y 1 -z 0 -Y 0" />
-    <arg name="init_pose_x" value="-2"/>
-    <arg name="init_pose_y" value="1"/>
     <arg name="robot_name"  value="rafael" />
     <arg name="model" value="$(arg model)"/>
   </include>
-
 </launch>
