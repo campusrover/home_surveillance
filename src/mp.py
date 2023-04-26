@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 from random import randint
-from std_msgs.msg import String
 from threading import Lock
 import time
 
 import rospy
+from std_msgs.msg import String
 
 class MP:
     def __init__(self, name):
@@ -19,13 +19,13 @@ class MP:
         self.majority = self.mp_count // 2 + 1
         self.other_mps = {'roba', 'robb', 'robc', 'rafael'}
         self.other_mps.remove(self.name)
+        self.resign = False
         
         #=====For resignation/re-election testing====================
-        self.resign = False
-        rospy.Subscriber('keys', String, self.__key_input_handler)
+        # rospy.Subscriber('keys', String, self.__key_input_handler)
         #============================================================
 
-        self.hegemony_publisher = rospy.Publisher(f'{self.name}_hegemony_broadcasts', String, queue_size=10)
+        self.election_result_publisher = rospy.Publisher(f'{self.name}_election_result_broadcasts', String, queue_size=10)
 
         self.vote_request_publisher = rospy.Publisher(f'{self.name}_vote_requests', String, queue_size=10)
         self.homage_request_publisher = rospy.Publisher(f'{self.name}_homage_requests', String, queue_size=10)
@@ -80,7 +80,7 @@ class MP:
     def __lead(self):
         if not self.resign:
             self.homage_request_publisher.publish(f'{self.term}, {self.name}')
-            self.hegemony_publisher.publish(self.name)
+            self.election_result_publisher.publish(self.name)
         else:
             self.__become_follower()
 
@@ -106,9 +106,11 @@ class MP:
             self.state = 'follower'
             self.voted_for = ''
 
-    def __key_input_handler(self, msg):
-        if msg.data[0] == 'r':
-            self.resign = True
+    #=====For resignation/re-election testing====================
+    # def __key_input_handler(self, msg):
+    #     if msg.data[0] == 'r':
+    #         self.resign = True
+    #============================================================
 
     #=======Helper Methods=======
 
@@ -163,7 +165,6 @@ class Ballot:
         self.yea = 0
         self.nay = 0
         self.mutex = Lock()
-
 
 if __name__ == '__main__':
     rospy.init_node('mp')

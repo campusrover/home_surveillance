@@ -6,7 +6,7 @@ from std_msgs.msg import String
 
 i = 0
 
-def hegemony_handler(msg):
+def election_result_handler(msg):
     global i
     i += 1
     print(f'{msg.data}, {i}')
@@ -15,6 +15,6 @@ if __name__== '__main__':
     rospy.init_node("lea_tester")
     mps = {'roba', 'robb', 'robc', 'rafael'}
     for mp in mps:
-        rospy.Subscriber(f'{mp}_hegemony_broadcasts', String, hegemony_handler)
+        rospy.Subscriber(f'{mp}_election_result_broadcasts', String, election_result_handler)
     rospy.spin()
     
