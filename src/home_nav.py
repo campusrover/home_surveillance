@@ -3,6 +3,8 @@
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
+#=====Important: Maybe have a HomeNav class that wraps both the leader 
+#=====management system and the HomeNavRoutine?====
 
 #=====Leader management system=====
 # implement as a class?
@@ -23,21 +25,25 @@ for guard in GUARDS:
 
 class HomeNavRoutine:
     def __init__(self, leader):
-        self.cur_leader = leader
-        self.cur_followers = {'roba', 'robb', 'robc', 'rafael'}
-        self.cur_followers.remove(self.cur_leader)
-        self.room_1 = [[(-1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0)],
-                       [(-1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0)]]
-        self.room_2 = []
-        self.room_3 = []
-        self.room_4 = []
+        self.__set_guards(leader)
+        self.__set_room_coordinates()
+        self.__connect_to_move_base_clients()
 
     def run(self):
-        # initialize action clients
-        # execute move_base goals
-        # exceptions?
+        self.__patrol(leader, rooms[0])
+        i = 1
+        for follower in self.followers:
+            self.__patrol(follower, rooms[i])
+            i+=1
+        
 
-    #=======Helper Methods=======
+    #=======Run Helper Methonds=======
+    def __patrol(self, guard, room):
+        for pose in room:
+            goal = self.__make_goal_pose(pose)
+            client = self.move_base_client[guard]
+            client.send_goal(goal)
+            client.wait_for_result()
 
     def __make_goal_pose(self, pose):
         goal_pose = MoveBaseGoal()
@@ -50,6 +56,26 @@ class HomeNavRoutine:
         goal_pose.target_pose.pose.orientation.z = pose[1][2]
         goal_pose.target_pose.pose.orientation.w = pose[1][3]
         return goal_pose
+
+    #=======Init Helper Methods=======
+    def __set_guards(self, leader):
+        self.leader = leader
+        self.followers = {'roba', 'robb', 'robc', 'rafael'}
+        self.followers.remove(self.leader)
+    
+    def __set_room_coordinates(self):
+        self.rooms = []
+        self.rooms.append([[(-1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0)],
+                       [(-1.0, 2.0, 0.0), (0.0, 0.0, 0.0, 1.0)]])
+
+    def __connect_to_move_base_clients(self):
+        self.move_base_client = {}
+        self.move_base_client[self.leader] = actionlib.SimpleActionClient(f'/{self.cur_leader}/move_base', MoveBaseAction)
+        self.move_base_client[self.leader].wait_for_server()
+
+        for follower in followers:
+            self.move_base_client[follower] = actionlib.SimpleActionClient(f'/{follower}/move_base', MoveBaseAction)
+            self.move_base_client[self.leader].wait_for_server()
 
 if __name__ == '__main__':
     rospy.init_node('homeNav')
