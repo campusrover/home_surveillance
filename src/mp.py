@@ -12,7 +12,36 @@ from std_msgs.msg import String
 
 class MP:
     def __init__(self, name):
-        self.__set_LEA_traits(name)
+        self.name = name
+        self.state = 'follower'
+        self.term = 0
+        self.voted_for = ''
+        self.cur_leader = ''
+        self.election_timeout = self.__get_rand_duration(2000, 3000)
+        self.paid_homage_at = rospy.Time.now()
+        self.mp_count = 4
+        self.majority = self.mp_count // 2 + 1
+        self.other_mps = {'roba', 'robb', 'robc', 'rafael'}
+        self.other_mps.remove(self.name)
+        self.should_resign = False
+        self.homage_request_thread = None
+
+        self.resignation_event = Event()
+        
+        #=====For resignation/re-election testing====================
+        rospy.Subscriber('keys', String, self.__key_input_handler)
+        #============================================================
+
+        self.election_result_publisher = rospy.Publisher(f'{self.name}_election_result_broadcasts', String, queue_size=10)
+
+        self.vote_request_publisher = rospy.Publisher(f'{self.name}_vote_requests', String, queue_size=10)
+        self.homage_request_publisher = rospy.Publisher(f'{self.name}_homage_requests', String, queue_size=10)
+
+        self.vote_reply_publisher_to = {}
+        for mp_name in self.other_mps:
+            rospy.Subscriber(f'{mp_name}_vote_requests', String, self.__vote_request_handler)
+            self.vote_reply_publisher_to[mp_name] = rospy.Publisher(f'{self.name}_vote_replies_to_{mp_name}', String, queue_size=10)
+            rospy.Subscriber(f'{mp_name}_homage_requests', String, self.__homage_request_handler)
 
     def attend_session(self):
         rate = rospy.Rate(20)
@@ -123,37 +152,6 @@ class MP:
     #============================================================
 
     #=======Helper Methods=======
-    def __set_LEA_traits(self, name):
-        self.name = name
-        self.state = 'follower'
-        self.term = 0
-        self.voted_for = ''
-        self.cur_leader = ''
-        self.election_timeout = self.__get_rand_duration(2000, 3000)
-        self.paid_homage_at = rospy.Time.now()
-        self.mp_count = 4
-        self.majority = self.mp_count // 2 + 1
-        self.other_mps = {'roba', 'robb', 'robc', 'rafael'}
-        self.other_mps.remove(self.name)
-        self.should_resign = False
-        self.homage_request_thread = None
-
-        self.resignation_event = Event()
-        
-        #=====For resignation/re-election testing====================
-        rospy.Subscriber('keys', String, self.__key_input_handler)
-        #============================================================
-
-        self.election_result_publisher = rospy.Publisher(f'{self.name}_election_result_broadcasts', String, queue_size=10)
-
-        self.vote_request_publisher = rospy.Publisher(f'{self.name}_vote_requests', String, queue_size=10)
-        self.homage_request_publisher = rospy.Publisher(f'{self.name}_homage_requests', String, queue_size=10)
-
-        self.vote_reply_publisher_to = {}
-        for mp_name in self.other_mps:
-            rospy.Subscriber(f'{mp_name}_vote_requests', String, self.__vote_request_handler)
-            self.vote_reply_publisher_to[mp_name] = rospy.Publisher(f'{self.name}_vote_replies_to_{mp_name}', String, queue_size=10)
-            rospy.Subscriber(f'{mp_name}_homage_requests', String, self.__homage_request_handler)
 
     def __send_homage_requests(self):
         while not self.resignation_event.is_set():

@@ -1,33 +1,47 @@
 #!/usr/bin/env python
+
+from threading import Thread
+
 import rospy
 import actionlib
 from std_msgs.msg import String
-
-# move_base is the package that takes goals for navigation
-# there are different implemenetations with a common interface
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
-# You need to know the coordinates that the map you are working
-# in is. I experimented with these numbers and the turtlebot3_stage_4
-# map from Turtlebot3. The first array is x,y,z location. The second one
-# is a "quaternion" defining an orientation. Quaternions are a different
-# mathematical represetnation for "euler angles", yaw, pitch and roll.
+class Zones:
+  A = [
+    [ (-1.0, 0.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)],
+    [ (-1.0, 0.7, 0.0),
+      (0.0, 0.0, 0.0, 1.0)]
+  ]
+  B = [
+    [ (1.0, 0.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)],
+    [ (1.0, 0.7, 0.0),
+      (0.0, 0.0, 0.0, 1.0)]
+  ]
+  C = [
+    [ (-1.0, 2.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)],
+    [ (-0.3, 2.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)]
+  ]
+  D = [
+    [ (-1.0, -1.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)],
+    [ (-0.3, -1.0, 0.0),
+      (0.0, 0.0, 0.0, 1.0)]
+  ]
 
-class PatrolTester:
-  def __init__(self):
-    self.waypoints = [
-        [ (-1.0, 0.0, 0.0),
-          (0.0, 0.0, 0.0, 1.0)],
-        [ (-1.0, 2.0, 0.0),
-          (0.0, 0.0, 0.0, 1.0)]
-    ]
+class Patrol:
+  def __init__(self, guard_name, zone):
+    self.zone = zone
+
     self.should_stop_patrol = False
-    # A node called 'patrol' which is an action client to move_base
-    rospy.init_node('leader_patrol')
-    rospy.Subscriber('keys', String, self.key_input_handler)
-    self.client = actionlib.SimpleActionClient('/roba/move_base', MoveBaseAction)
 
-    # wait for action server to be ready
+    rospy.Subscriber('keys', String, self.key_input_handler)
+    self.client = actionlib.SimpleActionClient(f'/{guard_name}/move_base', MoveBaseAction)
+
     self.client.wait_for_server()
   
   def key_input_handler(self, msg):
@@ -35,9 +49,6 @@ class PatrolTester:
       self.client.cancel_goal()
       self.should_stop_patrol = True
 
-# Function to generate a proper MoveBaseGoal() from a two dimensional array
-# containing a location and a rotation. This is just to make the waypoints array
-# simpler
   def goal_pose(self, pose):
     goal_pose = MoveBaseGoal()
     goal_pose.target_pose.header.frame_id = 'map'
@@ -52,7 +63,7 @@ class PatrolTester:
   
   def run(self):
     while not self.should_stop_patrol:
-      for pose in self.waypoints:
+      for pose in self.zone:
         goal = self.goal_pose(pose)
         print("Going for goal: ", goal)
         self.client.send_goal(goal)
@@ -62,5 +73,16 @@ class PatrolTester:
 
 # Main program starts here
 if __name__ == '__main__':
-  pt = PatrolTester()
-  pt.run()
+  rospy.init_node('patrol_test')
+  patrols = {Patrol('roba', Zones.A), Patrol('robb', Zones.B),
+            Patrol('robc', Zones.C), Patrol('rafael', Zones.D) }
+
+  patrol_threads = set()
+  for patrol in patrols:
+    patrol_threads.add(Thread(target=patrol.run, daemon = True))
+
+  for thread in patrol_threads:
+    thread.start()
+  
+  for thread in patrol_threads:
+    thread.join()
