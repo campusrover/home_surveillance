@@ -64,17 +64,21 @@ class Patrol:
     return goal_pose
   
   def execute(self):
+    robbery_event_handler_thread = Thread(target=self.robbery_event_handler, daemon = True)
+    robbery_event_handler_thread.start()
     while not self.robbery_event.is_set():
       for pose in self.zone:
         goal = self.goal_pose(pose)
         print("Going for goal: ", goal)
         self.client.send_goal(goal)
         self.client.wait_for_result()
-        # The reason the below isn't working, is because the canceling of the goal must
-        # occur between the send_goal and wait_for_result. What you need to do is start
-        # another thread that loops to check if self.robbery_event.is_set(), and if it is,
-        # executes client.cancel_goal.
         if self.robbery_event.is_set():
+          break
+    robbery_event_handler_thread.join()
+  
+  def robbery_event_handler(self):
+    while True:
+      if self.robbery_event.is_set():
           self.client.cancel_goal()
           break
 
