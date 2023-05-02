@@ -18,9 +18,9 @@
     <arg name="robot_name"  value="roba" />
     <arg name="model" value="$(arg model)"/>
   </include>
-  <!-- <node name="roba_ktt" pkg="robot_convoy" type="keys_to_twist_using_rate.py" respawn="false" output="screen">
+  <node name="mp_roba" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="roba" />
-  </node> -->
+  </node>
 
   <!-- BEGIN ROBOT 2-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
@@ -30,6 +30,9 @@
     <arg name="robot_name"  value="robb" />
     <arg name="model" value="$(arg model)"/>
   </include>
+  <node name="mp_robb" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robb" />
+  </node>
 
   <!-- BEGIN ROBOT 3-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
@@ -39,6 +42,9 @@
     <arg name="robot_name"  value="robc" />
     <arg name="model" value="$(arg model)"/>
   </include>
+  <node name="mp_robc" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robc" />
+  </node>
 
   <!-- BEGIN ROBOT 4-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
@@ -48,4 +54,7 @@
     <arg name="robot_name"  value="rafael" />
     <arg name="model" value="$(arg model)"/>
   </include>
+  <node name="mp_rafael" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="rafael" />
+  </node>
 </launch>

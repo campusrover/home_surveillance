@@ -8,46 +8,48 @@ from std_msgs.msg import String
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 class Zones:
-  A = [
+  Priority_Zone = [
     [ (-1.0, 0.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)],
     [ (-1.0, 0.7, 0.0),
       (0.0, 0.0, 0.0, 1.0)]
   ]
-  B = [
+  Other_Zones = [
+    [
     [ (1.0, 0.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)],
     [ (1.0, 0.7, 0.0),
       (0.0, 0.0, 0.0, 1.0)]
-  ]
-  C = [
+    ],
+    [
     [ (-1.0, 2.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)],
     [ (-0.3, 2.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)]
-  ]
-  D = [
+    ],
+    [
     [ (-1.0, -1.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)],
     [ (-0.3, -1.0, 0.0),
       (0.0, 0.0, 0.0, 1.0)]
+    ]
   ]
 
 class Patrol:
-  def __init__(self, guard_name, zone):
+  def __init__(self, robbery_event, guard_name, zone):
     self.zone = zone
 
-    self.should_stop_patrol = False
+    self.robbery_event = robbery_event
 
-    rospy.Subscriber('keys', String, self.key_input_handler)
+    # rospy.Subscriber('keys', String, self.key_input_handler)
     self.client = actionlib.SimpleActionClient(f'/{guard_name}/move_base', MoveBaseAction)
 
     self.client.wait_for_server()
   
-  def key_input_handler(self, msg):
-    if msg.data[0] == 'c':
-      self.client.cancel_goal()
-      self.should_stop_patrol = True
+  # def key_input_handler(self, msg):
+  #   if msg.data[0] == 'c':
+  #     self.client.cancel_goal()
+  #     self.should_stop_patrol = True
 
   def goal_pose(self, pose):
     goal_pose = MoveBaseGoal()
@@ -61,28 +63,34 @@ class Patrol:
     goal_pose.target_pose.pose.orientation.w = pose[1][3]
     return goal_pose
   
-  def run(self):
-    while not self.should_stop_patrol:
+  def execute(self):
+    while not self.robbery_event.is_set():
       for pose in self.zone:
         goal = self.goal_pose(pose)
         print("Going for goal: ", goal)
         self.client.send_goal(goal)
         self.client.wait_for_result()
-        if self.should_stop_patrol:
+        # The reason the below isn't working, is because the canceling of the goal must
+        # occur between the send_goal and wait_for_result. What you need to do is start
+        # another thread that loops to check if self.robbery_event.is_set(), and if it is,
+        # executes client.cancel_goal.
+        if self.robbery_event.is_set():
+          self.client.cancel_goal()
           break
 
-# Main program starts here
-if __name__ == '__main__':
-  rospy.init_node('patrol_test')
-  patrols = {Patrol('roba', Zones.A), Patrol('robb', Zones.B),
-            Patrol('robc', Zones.C), Patrol('rafael', Zones.D) }
+# patrol test (deprecated; update Patrol constructors and the Zones to accept event
+# objects if you want to run the test)
+# if __name__ == '__main__':
+#   rospy.init_node('patrol_test')
+  # patrols = {Patrol('roba', Zones.A), Patrol('robb', Zones.B),
+  #           Patrol('robc', Zones.C), Patrol('rafael', Zones.D) }
 
-  patrol_threads = set()
-  for patrol in patrols:
-    patrol_threads.add(Thread(target=patrol.run, daemon = True))
+  # patrol_threads = set()
+  # for patrol in patrols:
+  #   patrol_threads.add(Thread(target=patrol.execute, daemon = True))
 
-  for thread in patrol_threads:
-    thread.start()
+  # for thread in patrol_threads:
+  #   thread.start()
   
-  for thread in patrol_threads:
-    thread.join()
+  # for thread in patrol_threads:
+  #   thread.join()

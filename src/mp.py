@@ -10,6 +10,9 @@ import rospy
 import rosnode
 from std_msgs.msg import String
 
+from patrol import Patrol
+from patrol import Zones
+
 class MP:
     def __init__(self, name):
         self.name = name
@@ -25,14 +28,16 @@ class MP:
         self.other_mps.remove(self.name)
         self.should_resign = False
         self.homage_request_thread = None
-
         self.resignation_event = Event()
+        self.robbery_event = Event()
         
-        #=====For resignation/re-election testing====================
+        #=====For resignation and robbery event testing====================
         rospy.Subscriber('keys', String, self.__key_input_handler)
         #============================================================
 
+        #=====For LEA testing=====
         self.election_result_publisher = rospy.Publisher(f'{self.name}_election_result_broadcasts', String, queue_size=10)
+        #=========================
 
         self.vote_request_publisher = rospy.Publisher(f'{self.name}_vote_requests', String, queue_size=10)
         self.homage_request_publisher = rospy.Publisher(f'{self.name}_homage_requests', String, queue_size=10)
@@ -100,7 +105,6 @@ class MP:
             self.__become_follower()
         #=================DRAFT=================
         # IMPORTANT: ensure that the patrol threads are DAEMON threads
-        # else if self.robber_detected:
             #===Step 1: set the robbery event, so that the patrol
             #          threads stop; join the patrol threads;
             # -code: self.robbery_event.set()
@@ -116,9 +120,22 @@ class MP:
             # -code: self.robber_detected = false
             # -code: self.should_resign = true
         else:
-            # start surveillance here.
-            # surveillance continues, with one thread per guard, until self.robbery_event is set
             self.election_result_publisher.publish(self.name)
+            patrols = set()
+            patrols.add(Patrol(self.robbery_event, self.name, Zones.Priority_Zone))
+
+            for guard, zone in zip(self.other_mps, Zones.Other_Zones):
+                patrols.add(Patrol(self.robbery_event, guard, zone))
+
+            patrol_threads = set()
+            for patrol in patrols:
+                patrol_threads.add(Thread(target=patrol.execute, daemon = True))
+
+            for thread in patrol_threads:
+                thread.start()
+  
+            for thread in patrol_threads:
+                thread.join()
             
             
         #========================================
@@ -149,6 +166,9 @@ class MP:
     def __key_input_handler(self, msg):
         if msg.data[0] == 'r':
             self.should_resign = True
+        if msg.data[0] == 'd':
+            print('hello')
+            self.robbery_event.set()
     #============================================================
 
     #=======Helper Methods=======
