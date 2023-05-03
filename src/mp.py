@@ -26,12 +26,11 @@ class MP:
         self.majority = self.mp_count // 2 + 1
         self.other_mps = {'roba', 'robb', 'robc', 'rafael'}
         self.other_mps.remove(self.name)
-        self.should_resign = False
         self.homage_request_thread = None
-        self.resignation_event = Event()
-        self.robbery_event = Event()
+        self.should_resign = False
+        self.event_map = {"resignation": Event(), "robbery": Event()}
         
-        #=====For resignation and robbery event testing====================
+        #=====For robbery event simulations====================
         rospy.Subscriber('keys', String, self.__key_input_handler)
         #============================================================
 
@@ -97,35 +96,22 @@ class MP:
         if self.homage_request_thread is None:
             self.homage_request_thread = Thread(target=self.__send_homage_requests, daemon=True)
             self.homage_request_thread.start()
-        if self.should_resign:
-            self.resignation_event.set()
+            self.resignation_thread = Thread(target=self.__resignation_handler, daemon=True)
+            self.resignation_thread.start()
+        elif self.should_resign:
             self.homage_request_thread.join()
-            self.resignation_event.clear()
             self.homage_request_thread = None
+            self.resignation_thread.join()
+            self.event_map["resignation"].clear()
+            self.resignation_thread = None
             self.__become_follower()
-        #=================DRAFT=================
-        # IMPORTANT: ensure that the patrol threads are DAEMON threads
-            #===Step 1: set the robbery event, so that the patrol
-            #          threads stop; join the patrol threads;
-            # -code: self.robbery_event.set()
-            # join all patrol threads
-            # clear robbery_event
-            # set patrol_threads to empty dictionary
-            # -code: self.robbery_event.clear()
-            # -code: self.patrol_threads = {}
-            #===Step 2: respond to the robber, by having the robots converge to the robbery zone
-            #           this step needs more thought...
-            #===Step 3: set should_resign to true, and robber_detected to False,
-            #          so that the leader resigns, and the cycle continues
-            # -code: self.robber_detected = false
-            # -code: self.should_resign = true
         else:
             self.election_result_publisher.publish(self.name)
             patrols = set()
-            patrols.add(Patrol(self.robbery_event, self.name, Zones.Priority_Zone))
+            patrols.add(Patrol(self.event_map, self.name, Zones.zone_map["A"]))
 
-            for guard, zone in zip(self.other_mps, Zones.Other_Zones):
-                patrols.add(Patrol(self.robbery_event, guard, zone))
+            for guard, zone_name in zip(self.other_mps, Zones.secondary_zones):
+                patrols.add(Patrol(self.event_map, guard, Zones.zone_map[zone_name]))
 
             patrol_threads = set()
             for patrol in patrols:
@@ -136,11 +122,16 @@ class MP:
   
             for thread in patrol_threads:
                 thread.join()
-            
-            
-        #========================================
 
     #=======Callback Methods=======
+
+    def __resignation_handler(self):
+        while True:
+            if self.event_map["resignation"].is_set():
+                self.event_map["resignation"].set()
+                self.should_resign = True
+                break
+
     def __vote_request_handler(self, msg):
         received_term, candidate = self.__parse_message(msg)
         self.__update_term(received_term)
@@ -165,16 +156,16 @@ class MP:
     #=====For resignation/re-election testing====================
     def __key_input_handler(self, msg):
         if msg.data[0] == 'r':
-            self.should_resign = True
+            self.event_map["resignation"].set()
         if msg.data[0] == 'd':
             print('hello')
-            self.robbery_event.set()
+            self.event_map["robbery"].set()
     #============================================================
 
     #=======Helper Methods=======
 
     def __send_homage_requests(self):
-        while not self.resignation_event.is_set():
+        while not self.event_map["resignation"].is_set():
             self.homage_request_publisher.publish(f'{self.term}, {self.name}')
 
     def __get_rand_duration(self, start_msec, end_msec):

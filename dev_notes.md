@@ -1,9 +1,3 @@
-Think of an interesting way to use the result of leader election. One thing that's distinctive about the LEA is that it constantly sends a message over the `homage_request_publisher` that establishes its authority. So it's logical that the interesting aspect be coded in the `__homage_request_handler`, and that the messages that the `homage_request_publisher` carries have substantial content (e.g., encodings of what the leader expects the followers to do).
+The leader will maintain two maps, a `guard_map` and `zone_map`. For any zone `z` and guard `g`, where `g` is responsible for `z`, `guard_map` will contain `<z,g>`, while `zone_map` will contain `<g,z>`. 
 
-Another place to implement interesting actions would be in the `__lead` function itself, where the leader might have additional publications on topics besides the `homage_request_publisher`. 
-
-Another way that's interesting would be to use the `bondpy` package to have a node check when another is shutdown, and use that together with the method of catching a `roskill`, to implement basic failure recovery. E.g., when the leader node dies, the LEA adjusts and elects a new leader.
-
-cf. the two links below:
-https://answers.ros.org/question/240671/catching-a-rosnode-kill-a/
-http://wiki.ros.org/bondpy
+Whenever a follower robot `g` fails, the leader will check `z_missing = zone_map[g]` to see which zone the robot was responsible for. It will then iterate through `Zones.priority_list` in reverse order, and for the first zone `z_present` in the list for which `g == guard_map[z_present]` is not `None`, it will assign `g` to `z_missing`. 
