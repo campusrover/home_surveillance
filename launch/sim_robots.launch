@@ -47,16 +47,16 @@
   </include>
   
   <!--BEGIN mp nodes-->
-  <node name="mp_roba" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+  <node name="mp_roba" pkg="robot_convoy" type="sim_mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="roba" />
   </node>
-  <node name="mp_robb" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+  <node name="mp_robb" pkg="robot_convoy" type="sim_mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="robb" />
   </node>
-  <node name="mp_robc" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+  <node name="mp_robc" pkg="robot_convoy" type="sim_mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="robc" />
   </node>
-  <node name="mp_rafael" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+  <node name="mp_rafael" pkg="robot_convoy" type="sim_mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="rafael" />
   </node>
 </launch>

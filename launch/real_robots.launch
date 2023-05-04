@@ -32,4 +32,17 @@
     <arg name="robot_name"  value="rafael" />
     <arg name="model" value="$(arg model)"/>
   </include>
+
+  <node name="mp_roba" pkg="robot_convoy" type="real_mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="roba" />
+  </node>
+  <node name="mp_robb" pkg="robot_convoy" type="real_mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robb" />
+  </node>
+  <node name="mp_robc" pkg="robot_convoy" type="real_mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robc" />
+  </node>
+  <node name="mp_rafael" pkg="robot_convoy" type="real_mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="rafael" />
+  </node>
 </launch>

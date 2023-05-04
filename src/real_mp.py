@@ -11,8 +11,8 @@ import rospy
 import rosnode
 from std_msgs.msg import String
 
-from patrol import Patrol
-from patrol import Zones
+from real_patrol import Patrol
+from real_patrol import Zones
 
 class MP:
     def __init__(self, name):
@@ -107,8 +107,8 @@ class MP:
             self.homage_request_thread.start()
             self.resignation_thread = Thread(target=self.__resignation_handler, daemon=True)
             self.resignation_thread.start()
-            self.follower_death_handler_thread = Thread(target=self.__follower_death_handler, daemon=True)
-            self.follower_death_handler_thread.start()
+            # self.follower_death_handler_thread = Thread(target=self.__follower_death_handler, daemon=True)
+            # self.follower_death_handler_thread.start()
         elif self.should_resign:
             self.homage_request_thread.join()
             self.homage_request_thread = None
@@ -127,12 +127,12 @@ class MP:
             self.guard_map = {}
             self.zone_map = {}
 
-            for guard, zone_name in zip(self.other_mps, Zones.secondary_zones):
-                patrols.add(Patrol(self.global_interrupt_map, self.local_interrupt_map, guard, Zones.zone_map[zone_name]))
-                self.guard_map[zone_name] = guard
-                self.zone_map[guard] = zone_name
+            # for guard, zone_name in zip(self.other_mps, Zones.secondary_zones):
+            #     patrols.add(Patrol(self.global_interrupt_map, self.local_interrupt_map, guard, Zones.zone_map[zone_name]))
+            #     self.guard_map[zone_name] = guard
+            #     self.zone_map[guard] = zone_name
 
-            self.election_result_publisher.publish(f"leader: {self.name} // {self.guard_map}")
+            # self.election_result_publisher.publish(f"leader: {self.name} // {self.guard_map}")
 
             patrol_threads = set()
             for patrol in patrols:
