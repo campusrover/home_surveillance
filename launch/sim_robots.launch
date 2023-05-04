@@ -10,7 +10,7 @@
   <param name="robd_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/robd/turtlebot3_$(arg model).urdf.xacro" />
   <param name="rafael_description" command="$(find xacro)/xacro --inorder $(find robot_convoy)/urdf/rafael/turtlebot3_$(arg model).urdf.xacro" />
   
-  <!-- BEGIN ROBOT 1-->
+  <!-- BEGIN roba-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
     <arg name="init_pose" value="-x -2 -y -1 -z 0 -Y 0" />
     <arg name="init_pose_x" value="-2"/>
@@ -18,11 +18,8 @@
     <arg name="robot_name"  value="roba" />
     <arg name="model" value="$(arg model)"/>
   </include>
-  <node name="mp_roba" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
-    <param name="robot_name" type="string" value="roba" />
-  </node>
 
-  <!-- BEGIN ROBOT 2-->
+  <!-- BEGIN robb-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
     <arg name="init_pose" value="-x -2 -y -0.5 -z 0 -Y 0" />
     <arg name="init_pose_x" value="-2"/>
@@ -30,11 +27,8 @@
     <arg name="robot_name"  value="robb" />
     <arg name="model" value="$(arg model)"/>
   </include>
-  <node name="mp_robb" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
-    <param name="robot_name" type="string" value="robb" />
-  </node>
 
-  <!-- BEGIN ROBOT 3-->
+  <!-- BEGIN robc-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
     <arg name="init_pose" value="-x -2 -y 0 -z 0 -Y 0" />
     <arg name="init_pose_x" value="-2"/>
@@ -42,11 +36,8 @@
     <arg name="robot_name"  value="robc" />
     <arg name="model" value="$(arg model)"/>
   </include>
-  <node name="mp_robc" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
-    <param name="robot_name" type="string" value="robc" />
-  </node>
 
-  <!-- BEGIN ROBOT 4-->
+  <!-- BEGIN rafael-->
   <include file="$(find robot_convoy)/launch/sim_one_robot.launch" >
     <arg name="init_pose" value="-x -2 -y 0.5 -z 0 -Y 0" />
     <arg name="init_pose_x" value="-2"/>
@@ -54,6 +45,17 @@
     <arg name="robot_name"  value="rafael" />
     <arg name="model" value="$(arg model)"/>
   </include>
+  
+  <!--BEGIN mp nodes-->
+  <node name="mp_roba" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="roba" />
+  </node>
+  <node name="mp_robb" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robb" />
+  </node>
+  <node name="mp_robc" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
+    <param name="robot_name" type="string" value="robc" />
+  </node>
   <node name="mp_rafael" pkg="robot_convoy" type="mp.py" respawn="false" output="screen">
     <param name="robot_name" type="string" value="rafael" />
   </node>

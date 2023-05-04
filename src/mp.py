@@ -5,6 +5,7 @@ from threading import Thread
 from threading import Lock
 from threading import Event
 import time
+import copy
 
 import rospy
 import rosnode
@@ -27,8 +28,14 @@ class MP:
         self.other_mps = {'roba', 'robb', 'robc', 'rafael'}
         self.other_mps.remove(self.name)
         self.homage_request_thread = None
+        self.resignation_thread = None
+        self.follower_death_handler_thread = None
+        self.dynamic_patrol_threads = set()
         self.should_resign = False
-        self.event_map = {"resignation": Event(), "robbery": Event()}
+        self.guard_map = None
+        self.zone_map = None
+        self.global_interrupt_map = {"resignation": Event(), "robbery": Event(), "leader_shutdown": Event()}
+        self.local_interrupt_map = {"roba_shutdown": Event(), "robb_shutdown": Event(), "robc_shutdown": Event(), "rafael_shutdown": Event()}
         
         #=====For robbery event simulations====================
         rospy.Subscriber('keys', String, self.__key_input_handler)
@@ -59,14 +66,15 @@ class MP:
                 self.__lead()
             rate.sleep()
 
+    def kill_action_servers(self):
+        if self.state == 'leader':
+            self.global_interrupt_map["leader_shutdown"].set()
+
     #=======Session Methods=======
 
     def __follow(self):
         if self.__discharged():
-            if self.cur_leader != '' and self.__leader_is_dead(self.cur_leader):
-                self.other_mps.remove(self.cur_leader)
-                self.majority -= 1
-                self.mp_count -= 1
+            self.__remove_dead_mps()
             self.term += 1
             self.state = 'candidate'
 
@@ -93,25 +101,38 @@ class MP:
             sub.unregister()
 
     def __lead(self):
+        self.cur_leader = self.name
         if self.homage_request_thread is None:
             self.homage_request_thread = Thread(target=self.__send_homage_requests, daemon=True)
             self.homage_request_thread.start()
             self.resignation_thread = Thread(target=self.__resignation_handler, daemon=True)
             self.resignation_thread.start()
+            self.follower_death_handler_thread = Thread(target=self.__follower_death_handler, daemon=True)
+            self.follower_death_handler_thread.start()
         elif self.should_resign:
             self.homage_request_thread.join()
             self.homage_request_thread = None
             self.resignation_thread.join()
-            self.event_map["resignation"].clear()
+            self.global_interrupt_map["resignation"].clear()
             self.resignation_thread = None
+            self.follower_death_handler_thread.join()
+            self.follower_death_handler_thread = None
+            self.dynamic_patrol_threads = set()
             self.__become_follower()
         else:
-            self.election_result_publisher.publish(self.name)
             patrols = set()
-            patrols.add(Patrol(self.event_map, self.name, Zones.zone_map["A"]))
+            mps = self.other_mps.copy()
+            mps.add(self.name)
+            patrols.add(Patrol(self.global_interrupt_map, self.local_interrupt_map, self.name, Zones.zone_map["A"]))
+            self.guard_map = {}
+            self.zone_map = {}
 
             for guard, zone_name in zip(self.other_mps, Zones.secondary_zones):
-                patrols.add(Patrol(self.event_map, guard, Zones.zone_map[zone_name]))
+                patrols.add(Patrol(self.global_interrupt_map, self.local_interrupt_map, guard, Zones.zone_map[zone_name]))
+                self.guard_map[zone_name] = guard
+                self.zone_map[guard] = zone_name
+
+            self.election_result_publisher.publish(f"leader: {self.name} // {self.guard_map}")
 
             patrol_threads = set()
             for patrol in patrols:
@@ -127,8 +148,8 @@ class MP:
 
     def __resignation_handler(self):
         while True:
-            if self.event_map["resignation"].is_set():
-                self.event_map["resignation"].set()
+            if self.global_interrupt_map["resignation"].is_set():
+                self.global_interrupt_map["resignation"].set()
                 self.should_resign = True
                 break
 
@@ -148,24 +169,53 @@ class MP:
         received_term, pretender = self.__parse_message(msg)
         self.__update_term(received_term)
         if received_term >= self.term:
-            self.paid_homage_at = rospy.Time.now()
             self.cur_leader = pretender
+            self.paid_homage_at = rospy.Time.now()
             self.state = 'follower'
             self.voted_for = ''
+
+    def __follower_death_handler(self):
+        while not self.global_interrupt_map["resignation"].is_set():
+            obituaries = self.__remove_dead_mps()
+            for dead_follower in obituaries:
+                self.local_interrupt_map[f"{dead_follower}_shutdown"].set()
+                vacant_zone = self.zone_map[dead_follower]
+                self.__del_from_guard_zone_maps(dead_follower, vacant_zone)
+                vacant_zone_priority = Zones.secondary_zones_priority_map[vacant_zone]
+                if vacant_zone_priority != Zones.lowest_priority and self.guard_map.get(Zones.secondary_zones[vacant_zone_priority + 1]) is not None:
+                    for zone in reversed(Zones.secondary_zones):
+                        new_guard = self.guard_map.get(zone)
+                        if new_guard is not None:
+                            self.__del_from_guard_zone_maps(new_guard, self.zone_map[new_guard])
+                            self.local_interrupt_map[f"{new_guard}_shutdown"].set()
+                            self.local_interrupt_map = self.local_interrupt_map.copy()
+                            self.local_interrupt_map[f"{new_guard}_shutdown"] = Event()
+                            new_patrol = Patrol(self.global_interrupt_map, self.local_interrupt_map, new_guard, Zones.zone_map[vacant_zone])
+                            self.zone_map[new_guard] = vacant_zone
+                            self.guard_map[vacant_zone] = new_guard
+                            new_patrol_thread = Thread(target=new_patrol.execute, daemon=True)
+                            self.dynamic_patrol_threads.add(new_patrol_thread)
+                            new_patrol_thread.start()
+                            break
+        for thread in self.dynamic_patrol_threads:
+            thread.join()
 
     #=====For resignation/re-election testing====================
     def __key_input_handler(self, msg):
         if msg.data[0] == 'r':
-            self.event_map["resignation"].set()
+            self.global_interrupt_map["resignation"].set()
         if msg.data[0] == 'd':
             print('hello')
-            self.event_map["robbery"].set()
+            self.global_interrupt_map["robbery"].set()
     #============================================================
 
     #=======Helper Methods=======
+    def __del_from_guard_zone_maps(self, guard_name, zone_name):
+        del self.zone_map[guard_name]
+        del self.guard_map[zone_name]
 
     def __send_homage_requests(self):
-        while not self.event_map["resignation"].is_set():
+        while not self.global_interrupt_map["resignation"].is_set():
             self.homage_request_publisher.publish(f'{self.term}, {self.name}')
 
     def __get_rand_duration(self, start_msec, end_msec):
@@ -214,13 +264,21 @@ class MP:
         self.election_timeout = self.__get_rand_duration(2000, 3000)
         self.should_resign = False
     
-    def __leader_is_dead(self, leader):
-        leader_node = f'/mp_{self.cur_leader}'
-        nodes = rosnode.get_node_names()
-        if leader_node in nodes:
-            return False
-        else:
-            return True
+    def __remove_dead_mps(self):
+        obituary = set()
+        mp_map = {}
+        for mp in self.other_mps:
+            mp_map[f"/mp_{mp}"] = mp
+
+        live_nodes = rosnode.get_node_names()
+        for mp_node in mp_map:
+            if mp_node not in live_nodes:
+                dead_mp = mp_map[mp_node]
+                obituary.add(dead_mp)
+                self.other_mps.remove(dead_mp)
+                self.majority -= 1
+                self.mp_count -= 1
+        return obituary
 
 class Ballot:
     def __init__(self):
@@ -232,4 +290,5 @@ if __name__ == '__main__':
     rospy.init_node('mp')
     robot_name = rospy.get_param('~robot_name')
     mp = MP(robot_name)
+    rospy.on_shutdown(mp.kill_action_servers)
     mp.attend_session()

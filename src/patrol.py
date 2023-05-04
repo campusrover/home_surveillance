@@ -9,6 +9,8 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 class Zones:
   secondary_zones = ["B", "C", "D"]
+  secondary_zones_priority_map = {"B": 0, "C": 1, "D": 2}
+  lowest_priority = 2
   zone_map = {
     "A": [
       [ (-1.0, 0.0, 0.0),
@@ -36,12 +38,15 @@ class Zones:
     ]}
 
 class Patrol:
-  def __init__(self, event_map, guard_name, zone):
+  def __init__(self, global_interrupt_map, local_interrupt_map, guard_name, zone):
+    self.guard_name = guard_name
     self.zone = zone
 
-    self.event_map = event_map
+    self.global_interrupt_map = global_interrupt_map
 
-    self.client = actionlib.SimpleActionClient(f'/{guard_name}/move_base', MoveBaseAction)
+    self.local_interrupt_map = local_interrupt_map
+
+    self.client = actionlib.SimpleActionClient(f'/{self.guard_name}/move_base', MoveBaseAction)
 
     self.client.wait_for_server()
   
@@ -63,14 +68,16 @@ class Patrol:
   def __interrupt_handler(self):
     while True:
       if self.__interrupt_triggered():
-          self.client.cancel_goal()
-          break
+        self.client.cancel_goal()
+        break
 
   #=======Helper Methods=======
   
   def __interrupt_triggered(self):
-    for event in self.event_map.values():
-      if event.is_set():
+    for interrupt in self.global_interrupt_map.values():
+      if interrupt.is_set():
+        return True
+    if self.local_interrupt_map[f"{self.guard_name}_shutdown"].is_set():
         return True
     return False
 
@@ -85,3 +92,7 @@ class Patrol:
     goal_pose.target_pose.pose.orientation.z = pose[1][2]
     goal_pose.target_pose.pose.orientation.w = pose[1][3]
     return goal_pose
+  
+  def __parse_message(self, msg):
+    split_msg = msg.data.split(', ')
+    return int(split_msg[0]), split_msg[1]
