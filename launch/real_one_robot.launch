@@ -24,7 +24,7 @@
             <param name="recovery_alpha_fast"       value="0.00"/>
             <param name="initial_pose_x"            value="$(arg init_pose_x)"/>
             <param name="initial_pose_y"            value="$(arg init_pose_y)"/>
-            <param name="initial_pose_a"            value="0.0"/>
+            <param name="initial_pose_a"            value="-2.411084651947022"/>
             <param name="gui_publish_rate"          value="50.0"/>
 
             <remap from="/scan" to="/$(arg robot_name)/scan"/>
@@ -69,6 +69,9 @@
             <param name="local_costmap/global_frame" value="$(arg robot_name)/odom"/>
             <param name="local_costmap/robot_base_frame" value="$(arg robot_name)/base_footprint"/>
             
+            <!-- reduce red danger zone -->
+            <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_name)/base_scan"/>
+
             <remap from="map" to="/map"/>
         </node>
     </group>
