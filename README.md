@@ -1,38 +1,35 @@
-# Robot Convoy
+# Multi-Robot Home Surveillance
 
 ## Team Members
 1. Jongsuh Lee (James)
 
-## Project Description
+## How To Run
 
-On program execution, the robots will:
-1. elect a leader amongst themselves (Leader Election Phase);
-2. organize themselves in a line (Convoy Formation Phase); and
-3. proceed in linear fashion to the destination (Traveling Phase).
+There are two points of entry to the program:
+1. `sim_main.launch`; and
+2. `real_main.launch`.
 
-Throughout the demonstration, various unscripted events may occur, forcing the robots to repeat steps 1-3, or some subset thereof. For instance:
-1. the leader will be deemed unhealthy, through:
-    1. real-time termination of relevant nodes, or
-    2. the robot itself being shut-down;
-2. the leader will be deemed unqualified, by:
-    1. straying too far from the target destination (e.g., by being radically relocated by human intervention), or
-    2. having too-low battery levels;
-3. communication failure between robots will be simulated;
-4. a member of the convoy will be deemed unhealthy or unqualified (much like the leader might in cases 1 and 2); and
-5. a robot formerly ejected from the convoy will regain health or be re-qualified, such that it must be re-integrated back into the convoy, with a former leader coming back online being a special case.
+The first runs the simulation of the program. The second is meant to work with the 4 turtlebot3s that are named `roba`, `robb`, `robc`, and `rafael` respectively.
 
-The events will either trigger a repeat from the Leader Election Phase in the case of #1-#3, or from the Convoy Formation Phase, in the case of #4 and #5.
+'OAST' refers to 'On a separate terminal', and 'OANTW' means 'On a new terminal window' below.
 
-The MRS will account for a subset or proper superset of the events in #1-#4, depending on the difficulty of the project. The goal is to have a distributed MRS that is as
-robust as possible and resilient to component failures, communication failures, etc.
+For both branches:
+1. OAST exectue `roscore`
+2. OANTW execute `rosrun home_surveillance lea_display.py`
 
-## Learning Goals
+For the simulation branch:
 
-1. Learn Raft's Leader Election Algorithm, and maybe proceed to log replication as well, and use it to effect coordinated behaviors among the various robots.
-2. Develop a high degree of proficiency with robot localization and navigation using the tf2 package, map servers, etc.
+3. OAST, execute `roslaunch home_surveillance sim_main.launch`.
+4. You will see something like this on the window that is running `lea_display.py`: `leader: rafael // {'B': 'robc', 'C': 'roba', 'D': 'robb'}, 1`. It states that `rafael` is the leader robot, and that `robc` is patrolling zone `B`, `roba` is patrolling zone `C`, etc.
+5. OANTW, execute `rosnode kill mp_<robot_name>` where `<robot_name>` stands for the name of the robot you want to kill. If you kill the leader, the robots will all stop and elect a new leader amongst themselves, who will then assign different zones to the rest of the robots. If you kill a follower, the killed robot will stop, and the system will maintain the invariant.
 
-## How I would like to be evaluated.
+The invariant is: If we have n live robots, the first n zones in the list will be patrolled by at least one robot.
 
-1. Success in leveraging ROS's distributed system of topics, services, and actions to implement Raft.
-2. Usage of Raft's leader election and log replication algorithms to make the robots do something interesting.
-3. Mastery of robot localization and navigation using the map_server, the tf package, AMCL, and etc.
+For the real branch:
+
+3. OAST, ssh into each robot.
+4. run `$(bru mode real) && $(bru name <robot_name> -m <ip_address_of_vpn_computer>) && multibringup`.
+5. OAST execute `roslaunch home_surveillance real_main.launch`.
+6. Follow step 5 of the simulation branch.
+
+Note that for the system to work in real life: you need an area that is separated into four zones; the map file in `real_main.launch` has to set to a map of the area; the initial poses of the robots need to be properly set (you can do this via the launch file or the rviz interface); and the coordinates in `real_patrol`'s Zone class need to be properly set.
