@@ -62,7 +62,8 @@
     - n==3 → patrol(A, B, C)
 
 ## Video Demo
-[Watch the System in Action!](https://drive.google.com/file/d/1UgOknVUCbNmY5NiatFo7d72_akHZG5z7/view?resourcekey)
+Watch the System in Action!
+<video src="video/MRHS_demo-video.mp4" controls title="Title"></video>
 
 ## Program Structure
 - Two points of entry:  real_main.launch and sim_main.launch.

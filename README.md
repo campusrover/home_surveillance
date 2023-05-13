@@ -3,6 +3,11 @@
 ## Team Members
 1. Jongsuh Lee (James)
 
+## Video
+See the robots in action!
+
+<video src="video/MRHS_demo-video.mp4" controls title="Title"></video>
+
 ## How To Run
 
 There are two points of entry to the program:
