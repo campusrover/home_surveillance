@@ -4,9 +4,7 @@
 1. Jongsuh Lee (James)
 
 ## Video
-See the robots in action!
-
-<video src="video/MRHS_demo-video.mp4" controls title="Title"></video>
+[See the robots in action!](https://drive.google.com/file/d/1UgOknVUCbNmY5NiatFo7d72_akHZG5z7/view?usp=share_link)
 
 ## How To Run
 
