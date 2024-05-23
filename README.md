@@ -1,8 +1,5 @@
 # Multi-Robot Home Surveillance
 
-## Team Members
-1. Jongsuh Lee (James)
-
 ## Video
 [See the robots in action!](https://drive.google.com/file/d/1UgOknVUCbNmY5NiatFo7d72_akHZG5z7/view?usp=share_link)
 
